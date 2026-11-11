@@ -1,14 +1,14 @@
 # SAP ABAP CLASSIC (ECC / Netweaver)
 
-## 🎯 Business Use Case #1: During a corporate merger or system rollout, a massive volume of legacy user accounts (or master data) must be migrated into the SAP system. When standard BAPIs are unavailable or custom screen validations must be strictly enforced, the classic Batch Input (RPA) mechanism is required. This project simulates an automated ETL (Extract, Transform, Load) scenario to migrate legacy users into SAP via the SU01 (User Maintenance) transaction.
+## 🎯 Business Use Case #1: 
+During a corporate merger or system rollout, a massive volume of legacy user accounts (or master data) must be migrated into the SAP system. When standard BAPIs are unavailable or custom screen validations must be strictly enforced, the classic Batch Input (RPA) mechanism is required. This project simulates an automated ETL (Extract, Transform, Load) scenario to migrate legacy users into SAP via the SU01 (User Maintenance) transaction.
 
 ## 🏗️ Technical Architecture: 
 - [x] **Data Source:** Local CSV file (semicolon-separated). 
 - [x] **Frontend Integration:** CL_GUI_FRONTEND_SERVICES API for local file handling and directory navigation. 
 - [x] **Core Technology:** Batch Input (BDC) utilizing SHDB transaction recordings.
 - [x] **Target Transaction:** SU01 (User Management).
-
-Session Management: SM35 for batch processing and error logging.
+- [x] **Session Management:** SM35 for batch processing and error logging.
 
 ## ⚙️ Execution Flow & Class Architecture:
 - [x] **Data Extraction:** The ABAP report triggers a native OS file explorer dialog, allowing the user to select the CSV file. The data is loaded into an internal table using the GUI_UPLOAD method.
