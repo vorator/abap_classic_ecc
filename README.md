@@ -22,7 +22,7 @@
 - [x] **Modern ABAP Syntax:** Utilization of inline declarations (DATA(...)) to dynamically assign table structures without strictly typing them in the Data Dictionary.
 - [x] **Robust Error Handling:** System return code (SY-SUBRC) validations at every step (file selection, upload, and session creation) with appropriate SAP message semantic types (S and E).
 
--------------------------------------------------------------------------------------
+---
 ## 🎯 Business Use Case #2. BAPI Automaton & LUW Governance (Flight Model): The business requires a robust, automated interface to create reservations (simulating a Financial GL posting automaton) originating from external systems. The program must enforce strict data validation before committing any records to the database, ensuring that incomplete or invalid entries are rejected and logged comprehensively.
 
 ## 🏗️ Technical Architecture: 
@@ -43,6 +43,7 @@
 - **Strict LUW Governance:** Enforced explicit Database Commits only upon absolute validation success, avoiding partial data dumps and ensuring database integrity.
 - **Modern ALV Reporting:** Replaced legacy procedimental function modules (`REUSE_ALV`) with the `CL_SALV_TABLE` class for cleaner, object-oriented grid rendering and automatic column optimization.
 
+---
 
 ## 👨‍💻 About the Developer
 I am an IT Engineer and Software Developer specializing in SAP ABAP, S/4HANA architecture, and Java.
