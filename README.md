@@ -1,6 +1,7 @@
 # SAP ABAP CLASSIC (ECC / Netweaver)
 
-## 🎯 Business Use Case #1 Batch mass import (users): BDuring a corporate merger or system rollout, a massive volume of legacy user accounts (or master data) must be migrated into the SAP system. When standard BAPIs are unavailable or custom screen validations must be strictly enforced, the classic Batch Input (RPA) mechanism is required. This project simulates an automated ETL (Extract, Transform, Load) scenario to migrate legacy users into SAP via the SU01 (User Maintenance) transaction.
+## 🎯 Business Use Case #1 Batch mass import (users): 
+BDuring a corporate merger or system rollout, a massive volume of legacy user accounts (or master data) must be migrated into the SAP system. When standard BAPIs are unavailable or custom screen validations must be strictly enforced, the classic Batch Input (RPA) mechanism is required. This project simulates an automated ETL (Extract, Transform, Load) scenario to migrate legacy users into SAP via the SU01 (User Maintenance) transaction.
 
 ## 🏗️ Technical Architecture: 
 - **Data Source:** Local CSV file (semicolon-separated). 
@@ -23,7 +24,8 @@
 - [x] **Robust Error Handling:** System return code (SY-SUBRC) validations at every step (file selection, upload, and session creation) with appropriate SAP message semantic types (S and E).
 
 ---
-## 🎯 Business Use Case #2. BAPI Automaton & LUW Governance (Flight Model): The business requires a robust, automated interface to create reservations (simulating a Financial GL posting automaton) originating from external systems. The program must enforce strict data validation before committing any records to the database, ensuring that incomplete or invalid entries are rejected and logged comprehensively.
+## 🎯 Business Use Case #2. BAPI Automaton & LUW Governance (Flight Model): 
+The business requires a robust, automated interface to create reservations (simulating a Financial GL posting automaton) originating from external systems. The program must enforce strict data validation before committing any records to the database, ensuring that incomplete or invalid entries are rejected and logged comprehensively.
 
 ## 🏗️ Technical Architecture: 
 - **Data Input:** SAP Standard Selection Screen.
