@@ -4,11 +4,11 @@
 BDuring a corporate merger or system rollout, a massive volume of legacy user accounts (or master data) must be migrated into the SAP system. When standard BAPIs are unavailable or custom screen validations must be strictly enforced, the classic Batch Input (RPA) mechanism is required. This project simulates an automated ETL (Extract, Transform, Load) scenario to migrate legacy users into SAP via the SU01 (User Maintenance) transaction.
 
 ## 🏗️ Technical Architecture: 
-- **Data Source:** Local CSV file (semicolon-separated). 
-- **Frontend Integration:** CL_GUI_FRONTEND_SERVICES API for local file handling and directory navigation. 
-- **Core Technology:** Batch Input (BDC) utilizing SHDB transaction recordings.
-- **Target Transaction:** SU01 (User Management).
-- **Session Management:** SM35 for batch processing and error logging.
+* **Data Source:** Local CSV file (semicolon-separated). 
+* **Frontend Integration:** CL_GUI_FRONTEND_SERVICES API for local file handling and directory navigation. 
+* **Core Technology:** Batch Input (BDC) utilizing SHDB transaction recordings.
+* **Target Transaction:** SU01 (User Management).
+* **Session Management:** SM35 for batch processing and error logging.
 
 ## ⚙️ Execution Flow & Class Architecture:
 1 **Data Extraction:** The ABAP report triggers a native OS file explorer dialog, allowing the user to select the CSV file. The data is loaded into an internal table using the GUI_UPLOAD method.
@@ -18,20 +18,20 @@ BDuring a corporate merger or system rollout, a massive volume of legacy user ac
 5 **Execution:** The session is processed via SM35 using the Display errors only mode and Default Dynpro Size parameter to guarantee UI consistency and robust error handling.
 
 ## 🛠️ Key Features Implemented:
-- [x] **Clean Code Modularization:** Elimination of redundant BDCDATA mapping logic by encapsulating the SAP screen navigation and field population into reusable FORM subroutines (adhering to DRY principles).
-- [x] **Defensive Programming:** Implementation of TYPE string for raw file parsing to capture oversized inputs gracefully, allowing the system to log field-length errors in SM35 instead of crashing the ABAP program.
-- [x] **Modern ABAP Syntax:** Utilization of inline declarations (DATA(...)) to dynamically assign table structures without strictly typing them in the Data Dictionary.
-- [x] **Robust Error Handling:** System return code (SY-SUBRC) validations at every step (file selection, upload, and session creation) with appropriate SAP message semantic types (S and E).
+* [x] **Clean Code Modularization:** Elimination of redundant BDCDATA mapping logic by encapsulating the SAP screen navigation and field population into reusable FORM subroutines (adhering to DRY principles).
+* [x] **Defensive Programming:** Implementation of TYPE string for raw file parsing to capture oversized inputs gracefully, allowing the system to log field-length errors in SM35 instead of crashing the ABAP program.
+* [x] **Modern ABAP Syntax:** Utilization of inline declarations (DATA(...)) to dynamically assign table structures without strictly typing them in the Data Dictionary.
+* [x] **Robust Error Handling:** System return code (SY-SUBRC) validations at every step (file selection, upload, and session creation) with appropriate SAP message semantic types (S and E).
 
 ---
 ## 🎯 Business Use Case #2. BAPI Automaton & LUW Governance (Flight Model): 
 The business requires a robust, automated interface to create reservations (simulating a Financial GL posting automaton) originating from external systems. The program must enforce strict data validation before committing any records to the database, ensuring that incomplete or invalid entries are rejected and logged comprehensively.
 
 ## 🏗️ Technical Architecture: 
-- **Data Input:** SAP Standard Selection Screen.
-- **Core Technology:** Business Application Programming Interface (BAPI) - `BAPI_FLBOOKING_CREATEFROMDATA`.
-- **Transaction Control:** Logical Unit of Work (LUW) managed via `BAPI_TRANSACTION_COMMIT` and `BAPI_TRANSACTION_ROLLBACK`.
-- **Frontend Output:** Object-Oriented ALV Grid (`CL_SALV_TABLE`).
+* **Data Input:** SAP Standard Selection Screen.
+* **Core Technology:** Business Application Programming Interface (BAPI) - `BAPI_FLBOOKING_CREATEFROMDATA`.
+* **Transaction Control:** Logical Unit of Work (LUW) managed via `BAPI_TRANSACTION_COMMIT` and `BAPI_TRANSACTION_ROLLBACK`.
+* **Frontend Output:** Object-Oriented ALV Grid (`CL_SALV_TABLE`).
 
 ## ⚙️ Execution Flow & Class Architecture: 
 1 ***Data Mapping:** Variables from the selection screen are mapped into the `BAPISBONEW` input structure.
@@ -41,9 +41,9 @@ The business requires a robust, automated interface to create reservations (simu
 5 **Reporting:** `CL_SALV_TABLE=>FACTORY` is instantiated within a `TRY...CATCH` block to dynamically generate and display the execution logs to the user.
 
 ## 🛠️ Key Features Implemented:
-- **Defensive BAPI Calling:** Implemented `TEST_RUN` parameters to allow users to simulate database changes safely without altering physical tables.
-- **Strict LUW Governance:** Enforced explicit Database Commits only upon absolute validation success, avoiding partial data dumps and ensuring database integrity.
-- **Modern ALV Reporting:** Replaced legacy procedimental function modules (`REUSE_ALV`) with the `CL_SALV_TABLE` class for cleaner, object-oriented grid rendering and automatic column optimization.
+* **Defensive BAPI Calling:** Implemented `TEST_RUN` parameters to allow users to simulate database changes safely without altering physical tables.
+* **Strict LUW Governance:** Enforced explicit Database Commits only upon absolute validation success, avoiding partial data dumps and ensuring database integrity.
+* **Modern ALV Reporting:** Replaced legacy procedimental function modules (`REUSE_ALV`) with the `CL_SALV_TABLE` class for cleaner, object-oriented grid rendering and automatic column optimization.
 
 ---
 ## 🎯 Business Use Case #3 Standard Code Extension (Enhancement Framework & Clean Code):
@@ -65,6 +65,30 @@ Business stakeholders required a new fraud-prevention rule: 1st Class flight tic
 *   **Clean Code in Legacy Systems:** Demonstrated the ability to intervene in legacy procedural SAP code while maintaining business logic fully encapsulated in Object-Oriented classes.
 *   **Defensive Programming:** Implemented strict `SY-SUBRC` checks on database reads to prevent false positives and system dumps when evaluating business rules.
 *   **Zero-Modification Extensibility:** Altered core system behavior utilizing SAP's official Enhancement Framework, ensuring the system remains clean and easily upgradable.
+
+---
+## 🎯 Business Use Case #4 Framework Architecture (Custom BAdIs & Inversion of Control)
+The airline introduced a new luggage policy rejecting bookings exceeding 20kg of base luggage. Rather than hardcoding this volatile business rule into the standard system flow, the requirement was to build a scalable, plug-and-play architecture where luggage rules can be activated, deactivated, or versioned without touching standard SAP code.
+
+## 🏗️ Technical Architecture: 
+*   **Framework Foundation:** Custom BAdI Definition / Enhancement Spot (`ZES_FLIGHT_BOOKING`).
+*   **Contract:** Object-Oriented BAdI Interface (`ZIF_BADI_CHECK_LUGGAGE`).
+*   **Business Logic:** BAdI Implementation Class (`ZCL_IM_CHECK_LUGGAGE`).
+*   **Integration:** Implicit Enhancement utilizing modern `GET BADI` and `CALL BADI` statements.
+
+## ⚙️ Execution Flow & Class Architecture: 
+1.  **Framework Creation:** A Kernel BAdI was created from scratch via SE18, defining an instance method interface to receive luggage weight and export a boolean rejection flag.
+2.  **Implementation:** A single-use BAdI implementation was developed via SE19 to enforce the 20kg threshold.
+3.  **Loose Coupling (IoC):** The standard SAP BAPI was extended via Implicit Enhancement. Instead of calling a specific class, the BAPI requests any active BAdI implementations via `GET BADI`. 
+4.  **Graceful Degradation:** Wrapped in a `TRY...CATCH cx_badi_not_implemented` block, the system ensures that if the BAdI implementation is ever deactivated (e.g., policy revoked), the standard booking flow continues flawlessly without causing system dumps.
+
+## 🛠️ Key Features Implemented:
+*   **Inversion of Control:** Demonstrated advanced architectural patterns by decoupling the standard execution flow from the actual business logic implementation.
+*   **BAdI Lifecycle Management:** Mastered both sides of the Enhancement Framework: acting as a Framework Architect (SE18) and a Business Developer (SE19).
+*   **Future-Proofing:** Eliminated tight coupling, ensuring the business rule can be modified or disabled purely through configuration/activation states without requiring standard code transports.
+
+## 📸 Showcase
+<img width="3839" height="1052" alt="image" src="https://github.com/user-attachments/assets/cde848f4-b842-43fc-a9ff-25402f137774" />
 
 ## 👨‍💻 About the Developer
 I am an IT Engineer and Software Developer specializing in SAP ABAP, S/4HANA architecture, and Java.
