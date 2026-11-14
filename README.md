@@ -46,6 +46,25 @@ The business requires a robust, automated interface to create reservations (simu
 - **Modern ALV Reporting:** Replaced legacy procedimental function modules (`REUSE_ALV`) with the `CL_SALV_TABLE` class for cleaner, object-oriented grid rendering and automatic column optimization.
 
 ---
+## 🎯 Business Use Case #3 Standard Code Extension (Enhancement Framework & Clean Code):
+Business stakeholders required a new fraud-prevention rule: 1st Class flight tickets cannot be booked if the base flight price is below 500 EUR. Because the reservation creation is handled by a standard SAP function module (`BAPI_FLBOOKING_CREATEFROMDATA`), the core system behavior had to be altered without modifying standard SAP code (avoiding modification keys and preserving upgradeability).
+
+## 🏗️ Technical Architecture: 
+*   **Extension Technology:** Implicit Enhancement (Enhancement Framework).
+*   **Business Logic Container:** Global ABAP Class (`ZCL_FLIGHT_MARGIN_CHECK`).
+*   **Data Retrieval:** Defensive Open SQL (`SELECT SINGLE`).
+*   **Error Handling:** BAPI-Compliant error mapping (`BAPIRET2`).
+
+## ⚙️ Execution Flow & Class Architecture: 
+1.  **Code Injection:** An Implicit Enhancement (`Z_ENH_FLIGHT_MARGIN`) was created at the very beginning of the standard BAPI function module.
+2.  **Separation of Concerns:** Instead of hardcoding business rules inside the enhancement spot, the standard code simply delegates the payload to a static method of the Global Class.
+3.  **Early Return & Database Read:** The class method immediately returns if the booking is not '1st Class' (Performance Optimization). If it is, it queries the database (`SFLIGHT`) to fetch the base price, strictly verifying the `SY-SUBRC` system variable.
+4.  **Interception & Exit:** If the rule is violated, the class returns an ABAP boolean flag and appends a formatted error to the BAPI return table. The enhancement catches this flag and triggers an `EXIT` statement, safely aborting the standard SAP LUW before any database commit occurs.
+
+## 🛠️ Key Features Implemented:
+*   **Clean Code in Legacy Systems:** Demonstrated the ability to intervene in legacy procedural SAP code while maintaining business logic fully encapsulated in Object-Oriented classes.
+*   **Defensive Programming:** Implemented strict `SY-SUBRC` checks on database reads to prevent false positives and system dumps when evaluating business rules.
+*   **Zero-Modification Extensibility:** Altered core system behavior utilizing SAP's official Enhancement Framework, ensuring the system remains clean and easily upgradable.
 
 ## 👨‍💻 About the Developer
 I am an IT Engineer and Software Developer specializing in SAP ABAP, S/4HANA architecture, and Java.
