@@ -11,11 +11,11 @@ BDuring a corporate merger or system rollout, a massive volume of legacy user ac
 - **Session Management:** SM35 for batch processing and error logging.
 
 ## ⚙️ Execution Flow & Class Architecture:
-- **Data Extraction:** The ABAP report triggers a native OS file explorer dialog, allowing the user to select the CSV file. The data is loaded into an internal table using the GUI_UPLOAD method.
-- **Data Transformation:** The program iterates through the internal table. Generic string types are used in the initial extraction phase to prevent ABAP short dumps caused by unexpected file formatting.
-- **BDC Session Generation:** The BDC_OPEN_GROUP function initializes a new session. The program maps the CSV fields to the technical SAP Dynpro fields (BDCDATA structure) using modularized FORM routines (bdc_dynpro and bdc_field).
-- **Data Load:** BDC_INSERT pushes the transactional data into the SAP queue, followed by BDC_CLOSE_GROUP.
-- **Execution:** The session is processed via SM35 using the Display errors only mode and Default Dynpro Size parameter to guarantee UI consistency and robust error handling.
+1 **Data Extraction:** The ABAP report triggers a native OS file explorer dialog, allowing the user to select the CSV file. The data is loaded into an internal table using the GUI_UPLOAD method.
+2 **Data Transformation:** The program iterates through the internal table. Generic string types are used in the initial extraction phase to prevent ABAP short dumps caused by unexpected file formatting.
+3 **BDC Session Generation:** The BDC_OPEN_GROUP function initializes a new session. The program maps the CSV fields to the technical SAP Dynpro fields (BDCDATA structure) using modularized FORM routines (bdc_dynpro and bdc_field).
+4 **Data Load:** BDC_INSERT pushes the transactional data into the SAP queue, followed by BDC_CLOSE_GROUP.
+5 **Execution:** The session is processed via SM35 using the Display errors only mode and Default Dynpro Size parameter to guarantee UI consistency and robust error handling.
 
 ## 🛠️ Key Features Implemented:
 - [x] **Clean Code Modularization:** Elimination of redundant BDCDATA mapping logic by encapsulating the SAP screen navigation and field population into reusable FORM subroutines (adhering to DRY principles).
@@ -34,11 +34,11 @@ The business requires a robust, automated interface to create reservations (simu
 - **Frontend Output:** Object-Oriented ALV Grid (`CL_SALV_TABLE`).
 
 ## ⚙️ Execution Flow & Class Architecture: 
-- ***Data Mapping:** Variables from the selection screen are mapped into the `BAPISBONEW` input structure.
-- **BAPI Execution:** The BAPI validates the data referential integrity (optionally utilizing the `TEST_RUN` parameter for safe simulation).
-- **Error Evaluation:** The `BAPIRET2` return table is parsed. The program scans for Error (`E`) or Abort (`A`) message types.
-- **LUW Management:** If any error is detected, `BAPI_TRANSACTION_ROLLBACK` is explicitly called to clear the memory. If the validation is flawless, `BAPI_TRANSACTION_COMMIT` (with `WAIT = 'X'`) is triggered to safely persist the data.
-- **Reporting:** `CL_SALV_TABLE=>FACTORY` is instantiated within a `TRY...CATCH` block to dynamically generate and display the execution logs to the user.
+1 ***Data Mapping:** Variables from the selection screen are mapped into the `BAPISBONEW` input structure.
+2 **BAPI Execution:** The BAPI validates the data referential integrity (optionally utilizing the `TEST_RUN` parameter for safe simulation).
+3 **Error Evaluation:** The `BAPIRET2` return table is parsed. The program scans for Error (`E`) or Abort (`A`) message types.
+4 **LUW Management:** If any error is detected, `BAPI_TRANSACTION_ROLLBACK` is explicitly called to clear the memory. If the validation is flawless, `BAPI_TRANSACTION_COMMIT` (with `WAIT = 'X'`) is triggered to safely persist the data.
+5 **Reporting:** `CL_SALV_TABLE=>FACTORY` is instantiated within a `TRY...CATCH` block to dynamically generate and display the execution logs to the user.
 
 ## 🛠️ Key Features Implemented:
 - **Defensive BAPI Calling:** Implemented `TEST_RUN` parameters to allow users to simulate database changes safely without altering physical tables.
