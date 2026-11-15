@@ -3,7 +3,7 @@
 # 🎯 Business Use Case #1 Batch mass import (users): 
 BDuring a corporate merger or system rollout, a massive volume of legacy user accounts (or master data) must be migrated into the SAP system. When standard BAPIs are unavailable or custom screen validations must be strictly enforced, the classic Batch Input (RPA) mechanism is required. This project simulates an automated ETL (Extract, Transform, Load) scenario to migrate legacy users into SAP via the SU01 (User Maintenance) transaction.
 
-## 🏗️ Technical Architecture: 
+### 🏗️ Technical Architecture: 
 * **Data Source:** Local CSV file (semicolon-separated). 
 * **Frontend Integration:** CL_GUI_FRONTEND_SERVICES API for local file handling and directory navigation. 
 * **Core Technology:** Batch Input (BDC) utilizing SHDB transaction recordings.
