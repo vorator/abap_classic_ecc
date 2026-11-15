@@ -24,7 +24,7 @@ BDuring a corporate merger or system rollout, a massive volume of legacy user ac
 * [x] **Robust Error Handling:** System return code (SY-SUBRC) validations at every step (file selection, upload, and session creation) with appropriate SAP message semantic types (S and E).
 
 ---
-## 🎯 Business Use Case #2. BAPI Automaton & LUW Governance (Flight Model): 
+# 🎯 Business Use Case #2. BAPI Automaton & LUW Governance (Flight Model): 
 The business requires a robust, automated interface to create reservations (simulating a Financial GL posting automaton) originating from external systems. The program must enforce strict data validation before committing any records to the database, ensuring that incomplete or invalid entries are rejected and logged comprehensively.
 
 ## 🏗️ Technical Architecture: 
@@ -46,7 +46,7 @@ The business requires a robust, automated interface to create reservations (simu
 * [x] **Modern ALV Reporting:** Replaced legacy procedimental function modules (`REUSE_ALV`) with the `CL_SALV_TABLE` class for cleaner, object-oriented grid rendering and automatic column optimization.
 
 ---
-## 🎯 Business Use Case #3 Standard Code Extension (Enhancement Framework & Clean Code):
+# 🎯 Business Use Case #3 Standard Code Extension (Enhancement Framework & Clean Code):
 Business stakeholders required a new fraud-prevention rule: 1st Class flight tickets cannot be booked if the base flight price is below 500 EUR. Because the reservation creation is handled by a standard SAP function module (`BAPI_FLBOOKING_CREATEFROMDATA`), the core system behavior had to be altered without modifying standard SAP code (avoiding modification keys and preserving upgradeability).
 
 ## 🏗️ Technical Architecture: 
@@ -67,7 +67,7 @@ Business stakeholders required a new fraud-prevention rule: 1st Class flight tic
 * [x] **Zero-Modification Extensibility:** Altered core system behavior utilizing SAP's official Enhancement Framework, ensuring the system remains clean and easily upgradable.
 
 ---
-## 🎯 Business Use Case #4 Framework Architecture (Custom BAdIs & Inversion of Control)
+# 🎯 Business Use Case #4 Framework Architecture (Custom BAdIs & Inversion of Control)
 The airline introduced a new luggage policy rejecting bookings exceeding 20kg of base luggage. Rather than hardcoding this volatile business rule into the standard system flow, the requirement was to build a scalable, plug-and-play architecture where luggage rules can be activated, deactivated, or versioned without touching standard SAP code.
 
 ## 🏗️ Technical Architecture: 
@@ -91,7 +91,7 @@ The airline introduced a new luggage policy rejecting bookings exceeding 20kg of
 <img width="3839" height="1052" alt="image" src="https://github.com/user-attachments/assets/cde848f4-b842-43fc-a9ff-25402f137774" />
 
 ---
-## 🎯 Business Use Case #5 OOP Architecture
+# 🎯 Business Use Case #5 OOP Architecture
 The airline required a dynamic pricing and routing engine for its cargo transport division. Pricing rules vary heavily depending on the cargo type (e.g., live animals require flat vet fees and mandatory hold routing; normal luggage pays per kg; fragile luggage pays a handling surcharge). The goal was to build a scalable engine where new cargo types can be introduced without modifying the main program's logic.
 
 ## 🏗️ Technical Architecture: 
@@ -116,7 +116,7 @@ The airline required a dynamic pricing and routing engine for its cargo transpor
 <img width="3837" height="1054" alt="image" src="https://github.com/user-attachments/assets/7c11ae7e-3df5-4c41-af0b-3ca196283210" />
 
 ---
-## 🎯 Business Use Case #6 Data Dictionary & Data Modeling
+# 🎯 Business Use Case #6 Data Dictionary & Data Modeling
 The business required a way to store specific handling instructions for cargo (e.g., "Keep below 5ºC", "Live Animal") tied to specific flight bookings. Modifying the standard SAP `SBOOK` (Flight Booking) table is a poor practice that breaks upgrades. The solution required a custom "Side-car" table strictly linked to the standard booking data.
 
 ## 🏗️ Technical Architecture: 
