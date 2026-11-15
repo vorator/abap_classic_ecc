@@ -87,7 +87,7 @@ The airline introduced a new luggage policy rejecting bookings exceeding 20kg of
 * [x] **BAdI Lifecycle Management:** Mastered both sides of the Enhancement Framework: acting as a Framework Architect (SE18) and a Business Developer (SE19).
 * [x] **Future-Proofing:** Eliminated tight coupling, ensuring the business rule can be modified or disabled purely through configuration/activation states without requiring standard code transports.
 
-## 📸 Showcase
+### 📸 Showcase
 <img width="3839" height="1052" alt="image" src="https://github.com/user-attachments/assets/cde848f4-b842-43fc-a9ff-25402f137774" />
 
 ---
@@ -112,7 +112,7 @@ The airline required a dynamic pricing and routing engine for its cargo transpor
 * [x] **Upcasting (Widening Cast):** Inserted specific subclass objects (Animals, Luggage) into a generic internal table typed to the abstract superclass.
 * [x] **Clean Code & Scalability:** The main executable program is decoupled from the business rules. Adding a new cargo type (e.g., 'Surfboard') requires zero changes to the `Z_TEST_CARGO` report.
 
-## 📸 Showcase
+### 📸 Showcase
 <img width="3837" height="1054" alt="image" src="https://github.com/user-attachments/assets/7c11ae7e-3df5-4c41-af0b-3ca196283210" />
 
 ---
