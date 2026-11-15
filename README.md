@@ -1,148 +1,48 @@
-# SAP ABAP CLASSIC (ECC / Netweaver)
+# SAP ABAP Classic (ECC / NetWeaver)
 
-# 🎯 Business Use Case #1 Batch mass import (users): 
-BDuring a corporate merger or system rollout, a massive volume of legacy user accounts (or master data) must be migrated into the SAP system. When standard BAPIs are unavailable or custom screen validations must be strictly enforced, the classic Batch Input (RPA) mechanism is required. This project simulates an automated ETL (Extract, Transform, Load) scenario to migrate legacy users into SAP via the SU01 (User Maintenance) transaction.
+A portfolio of six small, self-contained ABAP projects for classic SAP systems (ECC / NetWeaver). Each one starts from a realistic business requirement and shows how it was solved with the appropriate classic technique: Batch Input, BAPIs, the Enhancement Framework, custom BAdIs, object-oriented design and Data Dictionary modeling.
 
-### 🏗️ Technical Architecture: 
-* **Data Source:** Local CSV file (semicolon-separated). 
-* **Frontend Integration:** CL_GUI_FRONTEND_SERVICES API for local file handling and directory navigation. 
-* **Core Technology:** Batch Input (BDC) utilizing SHDB transaction recordings.
-* **Target Transaction:** SU01 (User Management).
-* **Session Management:** SM35 for batch processing and error logging.
+The examples run on the SAP flight data model (`SFLIGHT`, `SBOOK`, `BAPI_FLBOOKING_CREATEFROMDATA`), so they can be tried on any system with the demo data installed.
 
-### ⚙️ Execution Flow & Class Architecture:
-1 **Data Extraction:** The ABAP report triggers a native OS file explorer dialog, allowing the user to select the CSV file. The data is loaded into an internal table using the GUI_UPLOAD method.
-2 **Data Transformation:** The program iterates through the internal table. Generic string types are used in the initial extraction phase to prevent ABAP short dumps caused by unexpected file formatting.
-3 **BDC Session Generation:** The BDC_OPEN_GROUP function initializes a new session. The program maps the CSV fields to the technical SAP Dynpro fields (BDCDATA structure) using modularized FORM routines (bdc_dynpro and bdc_field).
-4 **Data Load:** BDC_INSERT pushes the transactional data into the SAP queue, followed by BDC_CLOSE_GROUP.
-5 **Execution:** The session is processed via SM35 using the Display errors only mode and Default Dynpro Size parameter to guarantee UI consistency and robust error handling.
+## Use cases
 
-### 🛠️ Key Features Implemented:
-* [x] **Clean Code Modularization:** Elimination of redundant BDCDATA mapping logic by encapsulating the SAP screen navigation and field population into reusable FORM subroutines (adhering to DRY principles).
-* [x] **Defensive Programming:** Implementation of TYPE string for raw file parsing to capture oversized inputs gracefully, allowing the system to log field-length errors in SM35 instead of crashing the ABAP program.
-* [x] **Modern ABAP Syntax:** Utilization of inline declarations (DATA(...)) to dynamically assign table structures without strictly typing them in the Data Dictionary.
-* [x] **Robust Error Handling:** System return code (SY-SUBRC) validations at every step (file selection, upload, and session creation) with appropriate SAP message semantic types (S and E).
+| # | Use case | Main technique | Folder |
+|---|----------|----------------|--------|
+| 1 | Mass import of users from a CSV file | Batch Input (BDC), SU01, SM35 | [`z_md_user_upload`](src/z_md_user_upload) |
+| 2 | Automated flight booking with transaction control | BAPI, commit/rollback (LUW), `CL_SALV_TABLE` | [`z_flight_booking_bapi`](src/z_flight_booking_bapi) |
+| 3 | Business rule injected into standard code | Implicit Enhancement, global class | [`z_enhancementfw`](src/z_enhancementfw) |
+| 4 | Pluggable luggage policy | Custom BAdI (`GET BADI` / `CALL BADI`) | [`z_enhancementfw`](src/z_enhancementfw) |
+| 5 | Cargo pricing and routing engine | Inheritance, abstraction, polymorphism | [`z_abapobjects`](src/z_abapobjects) |
+| 6 | Cargo handling instructions linked to bookings | Transparent table, foreign key, side-car design | [`z_dataengeneering`](src/z_dataengeneering) |
 
----
-# 🎯 Business Use Case #2. BAPI Automaton & LUW Governance (Flight Model): 
-The business requires a robust, automated interface to create reservations (simulating a Financial GL posting automaton) originating from external systems. The program must enforce strict data validation before committing any records to the database, ensuring that incomplete or invalid entries are rejected and logged comprehensively.
+Each folder has its own README with the business case, the technical design, the execution flow and screenshots.
 
-### 🏗️ Technical Architecture: 
-* **Data Input:** SAP Standard Selection Screen.
-* **Core Technology:** Business Application Programming Interface (BAPI) - `BAPI_FLBOOKING_CREATEFROMDATA`.
-* **Transaction Control:** Logical Unit of Work (LUW) managed via `BAPI_TRANSACTION_COMMIT` and `BAPI_TRANSACTION_ROLLBACK`.
-* **Frontend Output:** Object-Oriented ALV Grid (`CL_SALV_TABLE`).
+## Repository layout
 
-### ⚙️ Execution Flow & Class Architecture: 
-1. ***Data Mapping:** Variables from the selection screen are mapped into the `BAPISBONEW` input structure.
-2. **BAPI Execution:** The BAPI validates the data referential integrity (optionally utilizing the `TEST_RUN` parameter for safe simulation).
-3. **Error Evaluation:** The `BAPIRET2` return table is parsed. The program scans for Error (`E`) or Abort (`A`) message types.
-4. **LUW Management:** If any error is detected, `BAPI_TRANSACTION_ROLLBACK` is explicitly called to clear the memory. If the validation is flawless, `BAPI_TRANSACTION_COMMIT` (with `WAIT = 'X'`) is triggered to safely persist the data.
-5. **Reporting:** `CL_SALV_TABLE=>FACTORY` is instantiated within a `TRY...CATCH` block to dynamically generate and display the execution logs to the user.
+```
+src/
+├── z_md_user_upload/        Use case 1: BDC user migration
+├── z_flight_booking_bapi/   Use case 2: BAPI booking automation
+├── z_enhancementfw/         Use cases 3 and 4: enhancement and BAdI
+├── z_abapobjects/           Use case 5: OOP cargo model
+└── z_dataengeneering/       Use case 6: ZCARGO_INSTR table
+```
 
-### 🛠️ Key Features Implemented:
-* [x] **Defensive BAPI Calling:** Implemented `TEST_RUN` parameters to allow users to simulate database changes safely without altering physical tables.
-* [x] **Strict LUW Governance:** Enforced explicit Database Commits only upon absolute validation success, avoiding partial data dumps and ensuring database integrity.
-* [x] **Modern ALV Reporting:** Replaced legacy procedimental function modules (`REUSE_ALV`) with the `CL_SALV_TABLE` class for cleaner, object-oriented grid rendering and automatic column optimization.
+The code is serialized in [abapGit](https://abapgit.org) format (`.abapgit.xml`, starting folder `/src/`, folder logic `FULL`), so every folder maps to an ABAP package.
 
----
-# 🎯 Business Use Case #3 Standard Code Extension (Enhancement Framework & Clean Code):
-Business stakeholders required a new fraud-prevention rule: 1st Class flight tickets cannot be booked if the base flight price is below 500 EUR. Because the reservation creation is handled by a standard SAP function module (`BAPI_FLBOOKING_CREATEFROMDATA`), the core system behavior had to be altered without modifying standard SAP code (avoiding modification keys and preserving upgradeability).
+## Getting started
 
-### 🏗️ Technical Architecture: 
-* **Extension Technology:** Implicit Enhancement (Enhancement Framework).
-* **Business Logic Container:** Global ABAP Class (`ZCL_FLIGHT_MARGIN_CHECK`).
-* **Data Retrieval:** Defensive Open SQL (`SELECT SINGLE`).
-* **Error Handling:** BAPI-Compliant error mapping (`BAPIRET2`).
+**Requirements**
+- An SAP NetWeaver ABAP system, release 7.52 or higher (the code uses inline declarations such as `DATA(...)`).
+- The SAP flight demo data. It can be generated with program `SAPBC_DATA_GENERATOR`.
+- [abapGit](https://docs.abapgit.org) installed (standalone version is enough).
 
-### ⚙️ Execution Flow & Class Architecture: 
-1. **Code Injection:** An Implicit Enhancement (`Z_ENH_FLIGHT_MARGIN`) was created at the very beginning of the standard BAPI function module.
-2. **Separation of Concerns:** Instead of hardcoding business rules inside the enhancement spot, the standard code simply delegates the payload to a static method of the Global Class.
-3. **Early Return & Database Read:** The class method immediately returns if the booking is not '1st Class' (Performance Optimization). If it is, it queries the database (`SFLIGHT`) to fetch the base price, strictly verifying the `SY-SUBRC` system variable.
-4. **Interception & Exit:** If the rule is violated, the class returns an ABAP boolean flag and appends a formatted error to the BAPI return table. The enhancement catches this flag and triggers an `EXIT` statement, safely aborting the standard SAP LUW before any database commit occurs.
+**Installation**
+1. In abapGit choose **New Online** and enter `https://github.com/vorator/abap_classic_ecc`.
+2. Pick a package for the objects, for example `$TMP` for a local test.
+3. Pull the repository, then activate all objects.
 
-### 🛠️ Key Features Implemented:
-* [x] **Clean Code in Legacy Systems:** Demonstrated the ability to intervene in legacy procedural SAP code while maintaining business logic fully encapsulated in Object-Oriented classes.
-* [x] **Defensive Programming:** Implemented strict `SY-SUBRC` checks on database reads to prevent false positives and system dumps when evaluating business rules.
-* [x] **Zero-Modification Extensibility:** Altered core system behavior utilizing SAP's official Enhancement Framework, ensuring the system remains clean and easily upgradable.
-
----
-# 🎯 Business Use Case #4 Framework Architecture (Custom BAdIs & Inversion of Control)
-The airline introduced a new luggage policy rejecting bookings exceeding 20kg of base luggage. Rather than hardcoding this volatile business rule into the standard system flow, the requirement was to build a scalable, plug-and-play architecture where luggage rules can be activated, deactivated, or versioned without touching standard SAP code.
-
-### 🏗️ Technical Architecture: 
-* **Framework Foundation:** Custom BAdI Definition / Enhancement Spot (`ZES_FLIGHT_BOOKING`).
-* **Contract:** Object-Oriented BAdI Interface (`ZIF_BADI_CHECK_LUGGAGE`).
-* **Business Logic:** BAdI Implementation Class (`ZCL_IM_CHECK_LUGGAGE`).
-* **Integration:** Implicit Enhancement utilizing modern `GET BADI` and `CALL BADI` statements.
-
-### ⚙️ Execution Flow & Class Architecture: 
-1. **Framework Creation:** A Kernel BAdI was created from scratch via SE18, defining an instance method interface to receive luggage weight and export a boolean rejection flag.
-2. **Implementation:** A single-use BAdI implementation was developed via SE19 to enforce the 20kg threshold.
-3. **Loose Coupling (IoC):** The standard SAP BAPI was extended via Implicit Enhancement. Instead of calling a specific class, the BAPI requests any active BAdI implementations via `GET BADI`. 
-4. **Graceful Degradation:** Wrapped in a `TRY...CATCH cx_badi_not_implemented` block, the system ensures that if the BAdI implementation is ever deactivated (e.g., policy revoked), the standard booking flow continues flawlessly without causing system dumps.
-
-### 🛠️ Key Features Implemented:
-* [x] **Inversion of Control:** Demonstrated advanced architectural patterns by decoupling the standard execution flow from the actual business logic implementation.
-* [x] **BAdI Lifecycle Management:** Mastered both sides of the Enhancement Framework: acting as a Framework Architect (SE18) and a Business Developer (SE19).
-* [x] **Future-Proofing:** Eliminated tight coupling, ensuring the business rule can be modified or disabled purely through configuration/activation states without requiring standard code transports.
-
-### 📸 Showcase
-<img width="3839" height="1052" alt="image" src="https://github.com/user-attachments/assets/cde848f4-b842-43fc-a9ff-25402f137774" />
-
----
-# 🎯 Business Use Case #5 OOP Architecture
-The airline required a dynamic pricing and routing engine for its cargo transport division. Pricing rules vary heavily depending on the cargo type (e.g., live animals require flat vet fees and mandatory hold routing; normal luggage pays per kg; fragile luggage pays a handling surcharge). The goal was to build a scalable engine where new cargo types can be introduced without modifying the main program's logic.
-
-### 🏗️ Technical Architecture: 
-* **Design Pattern:** Multi-level Inheritance & Polymorphism logic.
-* **Object Types:** Global ABAP Classes (`SE24` / `SE80`).
-* **Execution:** ABAP Executable Report with generic internal tables and Upcasting.
-
-### ⚙️ The 4 Pillars of OOP Implemented: 
-1. **Abstraction:** Created `ZCL_CARGO` and `ZCL_CARGO_NOANIMAL` as Abstract Classes. They define the mandatory blueprint and method signatures (e.g., `CALCULATE_SHIPPING_COST`) but cannot be instantiated directly, forcing developers to use specific subclasses.
-2. **Encapsulation:** Protected the system's integrity by using strict visibility rules:
-    * `MV_ID`: **Private** (Cannot be altered or read by external programs once instantiated).
-    * `MV_WEIGHT` / `MV_FRAGILE`: **Protected** (Only accessible by the inheriting child classes).
-    * Routing rules (e.g., Animals strictly in 'PRESSUREHOLD') are enforced inside the Constructor methods, eliminating the risk of external input errors.
-3. **Inheritance:** Built a multi-level class hierarchy to share core DNA: `ZCL_CARGO` (Grandparent) ➔ `ZCL_CARGO_NOANIMAL` (Parent) ➔ `ZCL_CARGO_LUGGAGE` (Child).
-4. **Polymorphism:** Utilized method redefinition. The main report simply calls `lo_cargo->calculate_shipping_cost( )` inside a loop. The ABAP runtime dynamically executes the specific algorithm for an Animal or a Fragile Luggage depending on the object reference, completely eliminating the need for `IF` or `CASE` statements in the main program.
-
-### 🛠️ Key Features Implemented:
-* [x] **Upcasting (Widening Cast):** Inserted specific subclass objects (Animals, Luggage) into a generic internal table typed to the abstract superclass.
-* [x] **Clean Code & Scalability:** The main executable program is decoupled from the business rules. Adding a new cargo type (e.g., 'Surfboard') requires zero changes to the `Z_TEST_CARGO` report.
-
-### 📸 Showcase
-<img width="3837" height="1054" alt="image" src="https://github.com/user-attachments/assets/7c11ae7e-3df5-4c41-af0b-3ca196283210" />
-
----
-# 🎯 Business Use Case #6 Data Dictionary & Data Modeling
-The business required a way to store specific handling instructions for cargo (e.g., "Keep below 5ºC", "Live Animal") tied to specific flight bookings. Modifying the standard SAP `SBOOK` (Flight Booking) table is a poor practice that breaks upgrades. The solution required a custom "Side-car" table strictly linked to the standard booking data.
-
-### 🏗️ Technical Architecture: 
-* **Object Type:** Transparent Database Table (`SE11`).
-* **Design Pattern:** Side-car extension with strict Referential Integrity.
-* **Package:** `Z_DATAENGENEERING` (Decoupled from application logic).
-
-### ⚙️ Key Implementation Steps:
-1. **Structural Alignment:** Created the custom table `ZCARGO_INSTR` mirroring the exact primary keys of `SBOOK` by reusing standard SAP Data Elements (`MANDT`, `S_CARR_ID`, `S_CONN_ID`, `S_DATE`, `S_BOOK_ID`).
-2. **Referential Integrity (Foreign Keys):** 
-    * Established a strict Foreign Key relationship to the check table `SBOOK`.
-    * Manually mapped and validated domain fields to ensure perfect data-type alignment, preventing orphaned cargo instructions for non-existent bookings.
-    * Defined Semantic Attributes: **Key fields / candidates** with a **1 : C** (Conditional) Cardinality (One booking has zero or one cargo instruction).
-3. **Database Optimization (Technical Settings):**
-    * **Data Class:** `APPL1` (Transaction Data) - ensuring the database treats it as highly volatile business data.
-    * **Size Category:** `0` (Optimized for initial low-volume testing).
-    * **Buffering:** Disabled (Bypassing the application server cache to ensure real-time consistency for cargo logistics).
-4. **Clean Activation:** Configured the Enhancement Category (`Can be enhanced`) to clear all dictionary warnings, ensuring zero technical debt.
-
-### 🛠️ Key Features Implemented:
-* **Clean Core Strategy:** Extended standard SAP functionality using a Side-car approach, ensuring the core ERP system remains completely upgrade-safe.
-* **Orphan Record Prevention:** The database engine actively rejects any cargo instruction that does not belong to a valid, existing `SBOOK` flight booking, ensuring absolute data consistency.
-* **Zero Technical Debt Delivery:** Achieved a flawless activation log by meticulously configuring Domain Data Elements, Semantic Attributes, and Enhancement Categories.
-
-### 📸 Showcase
-<img width="1914" height="1047" alt="image" src="https://github.com/user-attachments/assets/f700be5b-c69f-4a78-80cd-fe61d5b64139" />
+Use case 1 also needs a CSV file with the users to migrate. Use case 3 and 4 enhance the standard function module `BAPI_FLBOOKING_CREATEFROMDATA`, so test them in a development system, not a shared one.
 
 ---
 ## 👨‍💻 About the Developer
